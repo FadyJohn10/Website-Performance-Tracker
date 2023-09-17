@@ -54,6 +54,6 @@ To use Website Performance Tracker, follow these steps:
 <p>4. The application will start analyzing the performance metrics.</p>
 <p>5. You can view the performance data, including trends, in the dashboard section.</p>
 
-# Snapshot
+# Screenshot
 <img width="100%" alt="Screenshot 2023-09-16 at 7 07 26 PM" src="https://github.com/FadyJohn10/Website-Performance-Tracker/assets/63600279/f5cbc406-d895-476b-ad7d-330101234016">
 
