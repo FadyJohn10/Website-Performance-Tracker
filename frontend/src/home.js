@@ -1,7 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import MySidebar from "./navbar";
+import UrlInput from "./urlinput";
+import ChartComponent from "./ChartComponent";
 function Home() {
     const navigate = useNavigate();
     const [auth, setAuth] = useState(false);
@@ -17,39 +22,40 @@ function Home() {
             }
         })
     })
-
-    const handleDelete = () => {
-        axios.get('http://localhost:5500/logout')
-        .then(res => {
-            window.location.reload(true);
-        }).catch(err => console.log(err));
-    }
-
-    const urlSubmit = (e) => {
-        e.preventDefault();
-        let url = document.getElementById("url").value;
-        console.log(url);
-        axios.post('http://localhost:5500/urlsubmit', {url})
-        .then(res => {
-            if(res.data.Status === 'Success'){
-                console.log("sent");
-            }
+    
+    // Fetching yser data
+    const [userData, setUserData] = useState([]);
+    useEffect(() => {
+        axios
+        .get('http://localhost:5500/userdata')
+        .then((response) => {
+            setUserData(response.data);
         })
-        .then(err => console.log(err));
-    }
+        .catch((error) => {
+            console.error('Error fetching user data:', error);
+        });
+    }, []);
 
     return (
        <div>
             {
                 auth ?
-                <div>
-                    <h2>IT IS MY HOME</h2>
-                    <button onClick={handleDelete}>log out</button>
-                    <br/>
-                    <form onSubmit={urlSubmit}>
-                        <input type="url" id="url" name="url" placeholder="enter a website url"></input>
-                        <input type="submit" value="submit"></input>
-                    </form>
+                <div>                    
+                    <Container fluid style={{padding: 0}}>
+                        <Row style={{marginRight: 0}}>
+                            <Col xs={2} lg={3}>
+                                <MySidebar/>
+                            </Col>
+                            <Col xs={10} lg={8}>
+                                <h2 className="text-white mt-5">Welcome, {userData.name}</h2>
+                                <p style={{color: '#ccc'}}>Measure your wesbites performance metrics</p>
+                                <UrlInput/>
+                                <ChartComponent/>
+                            </Col>
+                        </Row>
+                    </Container>
+                    
+
                 </div>
                 :
                 <h2>not authorized</h2>

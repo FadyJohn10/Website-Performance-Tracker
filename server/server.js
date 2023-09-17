@@ -44,6 +44,7 @@ app.post('/register', (req, res) => {
 })
 
 let globalUserId;
+let globalURL;
 
 app.post('/login', (req, res) => {
     const sql = "SELECT * FROM users WHERE email = ?";
@@ -55,6 +56,17 @@ app.post('/login', (req, res) => {
                 if(response){
                     const name = data[0].name;
                     globalUserId = data[0].id;
+                    app.get('/userdata', (req, res) => {
+                        // const sql = "SELECT * FROM `users` WHERE `id` = ?";
+                        // db.query(sql, [data[0].id], (err, data) => {
+                        //     if(data.length > 0){
+                        //         res.json(data);
+                        //     }else{
+                        //         console.log("error fetching user data");
+                        //     }
+                        // })
+                        res.json(data[0]);
+                    })
                     const token = jwt.sign({name}, 'jwt-secret-key', {expiresIn: '1d'});
                     res.cookie('token', token);
                     return res.json({Status: "Success"});
@@ -96,6 +108,7 @@ app.get('/logout', (req, res) => {
 
 app.post('/urlsubmit', async (req, res) => {
     const url = req.body.url;
+    globalURL = url;
     console.log("USER ID: ", globalUserId);
 
     //insert the url into the database
@@ -119,16 +132,30 @@ app.post('/urlsubmit', async (req, res) => {
     const pwa = lhresult.categories.pwa.score * 100;
     const bestPr = lhresult.categories['best-practices'].score * 100;
     // insert the metrices into the db
-    const sql3 = "INSERT INTO `metrics` (`id`, `url`, `performance`, `seo`, `accessibility`, `best_pr`, `pwa`) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    db.query(sql3, [globalUserId, url, performance, seo, accessibility, bestPr, pwa], (err, result) => {
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().split('T')[0];
+    const sql3 = "INSERT INTO `metrics` (`id`, `url`, `date`, `performance`, `seo`, `accessibility`, `best_pr`, `pwa`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    db.query(sql3, [globalUserId, url, formattedDate, performance, seo, accessibility, bestPr, pwa], (err, result) => {
         if(err){
-            console.log("5rqa hena");
+            console.log(err);
         }else{
             console.log("dd");
         }
     })
 
     console.log("done");
+
+})
+
+app.get('/data', (req, res) => {
+    const sql = "SELECT * FROM `metrics` WHERE `id` = ? AND `url` = ? ";
+    db.query(sql, [globalUserId, globalURL], (err, data) => {
+        if(data.length > 0){
+            res.json(data);
+        }else{
+            console.log("error fetching");
+        }
+    })
 })
 
 app.listen(5500, () => {
